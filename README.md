@@ -1,3 +1,6 @@
+# Proposal for the creating a Parallel-In-Time Benchmark
+========================================================
+
 This document was started at the [Fifth Parallel-in-time Integration
 Workshop](http://www.birs.ca/events/2016/5-day-workshops/16w5030),
 held in Banff, CA at the [BIRS facility](http://birs.ca).  Some of the
