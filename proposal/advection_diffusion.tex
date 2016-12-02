@@ -1,1 +1,32 @@
-\todo[inline]{Benjamin Ong}
+The advection--diffusion (AD) equation (sometimes known as the
+convection--diffusion or drift--diffusion equation) describes physical
+systems whose evolution is due to two processes, diffusion and
+convection.  It AD equation can be derived from the continuity
+equation.  The general form of the AD equation is
+\begin{align}
+  u_t = \nabla\cdot(D\nabla u) - \nabla \cdot (\vec{b} u),
+  \label{eqn:advection_diffusion}
+\end{align}
+where $D$ is the diffusion coefficient, and $\vec{b}$ is the
+convection velocity.  
+
+The diffusion process introduces a time-step restriction for purely
+explicit schemes.  Hence, a semi-implicit integrator (e.g. an
+implicit--explicit scheme) is often used to evolve the system, where
+the (stiff) diffusive term is handled implicitly, and the (non-stiff)
+advective term is handled explicitly.  There are several approaches to
+generate the system of ODEs
+\begin{align*}
+  \frac{du}{dt} = f_{stiff}(t,u) + f_{nonstiff}(t,u) 
+\end{align*}
+from equation~\eqref{eqn:advection_diffusion} that will allow us to
+apply the semi-implicit time integrator.  Several discretizations for
+replacing the spatial derivatives by algebraic expressions are
+provided in this benchmarking suite.
+\begin{itemize}
+\item A finite difference discretization
+\item A finite volume discretization
+\item A spectral discretization
+\end{itemize}
+
+
