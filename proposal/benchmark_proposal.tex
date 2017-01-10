@@ -5,9 +5,12 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{todonotes}
 
+\bibliographystyle{plain}
+
+
 \title{Parallel--In--Time Benchmark Suite Proposal}
 
-\author{Ong, Benjamin \and \ldots}
+\author{Ong, Benjamin \and Neumann, Philipp \and Ruprecht, Daniel \and Schreiber, Martin\ldots}
 
 
   \date{\today}
@@ -26,8 +29,21 @@ What is the goal of this benchmark suite?  Some ideas:
 \item Ease of use
 \end{itemize}
 
+
+\subsection{Requirements to cite this work}
+To fulfill PinT benchmarks and assure reproducibility of the benchmark test cases, we would like to request to
+\begin{itemize}
+	\item provide reference simulations to these benchmarks,
+	\item publish the source code which realises the time stepping,
+	\item publish the scripts which can reproduce the results with the code.
+\end{itemize}
+
+
 \section{Problem Definitions}
 
+%
+% PDEs for typically Eulerian formulations
+%
 \subsection{Heat Equation}
 
 \subsection{Reaction--Diffusion}
@@ -39,26 +55,39 @@ What is the goal of this benchmark suite?  Some ideas:
 \subsection{Burgers' Equation}
 \input{burgers}
 
-\subsection{Shallow Water in $R^{n}, n \ge 1$ }
+\subsection{Shallow Water (1D and 2D)}
 \input{shallow_water}
-
-\subsection{Molecular Dynamics (Coloumb)}
-\input{md}
 
 \subsection{Euler}
 \input{euler}
 
-\subsection{Navier Stokes}
+\subsection{Lattice-Boltzmann and Navier Stokes}
+\input{lattice_boltzmann_and_navier_stokes}
+
+%DC belongs to LBM/NS but was not included due to missing analytical solution
+%\subsection{Driven Cavity}
+
+%
+% Particle based methods (Lagrangian methods)
+%
+
+\subsection{Molecular Dynamics (Coloumb)}
+\input{md}
+
+
+%
+% Others
+%
 
 \subsection{Constrained Hamiltonian Systems}
 
 \subsection{Differential Algebraic Equations}
 \input{dae}
 
-\subsection{Lattice-Boltzmann}
-\input{lattice_boltzmann}
-\todo[inline]{Martin Schreiber}
 
-\subsection{Driven Cavity}
+
+\section*{Related work}
+\bibliography{lattice_boltzmann_and_navier_stokes}
+
 
 \end{document}

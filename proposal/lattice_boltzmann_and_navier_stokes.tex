@@ -1,0 +1,221 @@
+Authors: Philipp Neumann\footnote{philipp.neumann@uni-hamburg.de}, Daniel Ruprecht\footnote{D.Ruprecht@leeds.ac.uk}, Martin Schreiber\footnote{M.Schreiber@exeter.ac.uk, Corresponding author}
+
+This paragraph discusses a set of benchmarks which are suited to show the application of parallel-in-time methods to simulations based on the Navier-Stokes (NS) equations and the Lattice Boltzmann method (LBM).
+Since the Lattice Boltzmann method resembles the Navier-Stokes equations asymptotically, we suggest benchmarks for both types of flow simulation.
+We restrict considerations to incompressible (Navier-Stokes) and weakly compressible (Lattice Boltzmann) systems.
+
+
+\subsubsection{Incompressible Navier-Stokes equations}
+The two-dimensional incompressible Navier-Stokes equations can be formulated with (see \cite{wikiTaylorGreen}) the continuity equation
+\begin{eqnarray}
+\frac{\partial v_0}{\partial x_0}+ \frac{\partial v_1}{\partial x_1} &=& 0\\
+\end{eqnarray}
+and the momentum equations
+% NOTE: Ich habe rho hier rausgeschmissen, da man die Dichte mE für die Szenarien nicht braucht.
+\begin{eqnarray}
+\frac{\partial v_0}{\partial t} + v_0\frac{\partial v_0}{\partial x_0} + v_1\frac{\partial v_0}{\partial x_1} &=&
+-\frac{\partial p}{\partial x_0} + \nu \left( \frac{\partial^2 v_0}{\partial x_0^2} +
+\frac{\partial^2 v_0}{\partial x_1^2} \right)\\
+%
+\frac{\partial v_1}{\partial t} + v_0\frac{\partial v_1}{\partial x_0} + v_1\frac{\partial v_1}{\partial x_1} &=&
+-\frac{\partial p}{\partial x_1} + \nu \left( \frac{\partial^2 v_1}{\partial x_0^2} +
+\frac{\partial^2 v_1}{\partial x_1^2} \right)
+\end{eqnarray}
+
+
+
+\subsubsection{Lattice Boltzmann model}
+The Lattice Boltzmann method (LBM) is formulated at the mesoscopic level and can be positioned between the microscale simulations (e.g.\,molecular dynamics) and macroscopic simulations (e.g. Navier-Stokes).
+Based on the Boltzmann distribution function, several discretization steps lead to a cellular-automaton formulation.
+For PinT studies we restrict studies to two-dimensional formulations in this benchmark suite; three-dimensional studies are of significance, e.g. in the case of turbulent flows, and may be included at a later stage.
+Using the DdQq notation with $d$ denoting the dimensions and $q$ the number of lattice vectors, the D2Q9 formulation may be used.
+See e.g.\,\cite{korner2005lattice} for the following formulation.
+
+For the D2Q9 model, the discrete set of propagation velocities are given by $\vec{v}_i = \vec{e}_i$ with $\vec{e}_i$ all possible lattice vectors with $j = |\vec{e}_i|^2 \in \{0,1,2\}$.
+Here, $\vec{e}_0$ is the zero-vector which points to the local cell itself, $vec{e}_{\{1,2,3,4\}}$ the vectors pointing to the left, right, bottom, top adjacent cell and $vec{e}_{\{5,6,7,8\}}$ the diagonal oriented vectors pointing to the corner-adjacent cells.
+Let $f_i(\vec{x})$ be the density distribution in cell $\vec{x}$ for lattice velocity $\vec{e}_i$, $t$ the simulation time, $t+1$ the parametrised time step size propagating bulks of particles from one cell along the lattice vectors and $F_i$ some external force; in the presented test cases, $F_i=0$ and can thus be omitted.
+Given the density distributions $f_i$ of a cell along lattice vectors $\vec{e}_i$, we can compute the density $\rho$ and pressure $p$
+\begin{eqnarray}
+	\rho &=& \sum_{i=0}^q f_i\\
+        p    &=& \cfrac{1}{3} \rho
+\end{eqnarray}
+and momentum
+\begin{equation}
+	\rho \vec{v} = \sum_{i=0}^q f_i \vec{e}_i
+\end{equation}
+
+The LB update rule is given by
+\begin{equation}
+	f_i(\vec{x}+\vec{e}_{i}, t+1) = f_i(\vec{x},t) - \frac{1}{\tau}
+	\left(
+		f_i(\vec{x},t) - f_i^{eq}(\vec{x},t)
+	\right)
+	+ F_i
+\end{equation}
+with equilibrium distribution
+\begin{equation}
+	f_i^{eq}(\rho, \vec{v}) = \omega_j \rho
+	\left[
+		1 + 3(\vec{e}_i \cdot \vec{v}) + \frac{9}{2} (\vec{e}_i \cdot \vec{v})^2 - \frac{3}{2} \vec{v}^2
+	\right]
+\end{equation}
+where
+	$\omega_0 = \frac{16}{36}$,
+	$\omega_1 = \frac{4}{36}$ and
+	$\omega_2 = \frac{1}{36}$.
+
+
+
+\subsubsection{Benchmarks}
+
+The suggested benchmarks LBM-1 and LBM-2 both have an analytical solution which makes them very well suited to test for convergence of PinT methods.
+
+%For all benchmarks, the domain is given on the quad shaped domain $\Omega=[0;1]^2$ with a velocity profile $u(\vec{x})$ with $\vec{x} \in \Omega$ and boundary conditions $\vec{x} \in d\Omega$.
+
+
+%%%%%%%%%%
+%%% LBM-1: Couette flow
+%%%%%%%%%%
+\paragraph{LBM-1: Developing Couette Flow}
+
+\subparagraph{Benchmark description}
+
+We consider a channel setup with periodic conditions at the left and right boundary and a no-slip (e.g., half-way bounce back) boundary ($u(x_1=H,t)=0$, $t\geq 0$) at the top.
+%\todo{Martin, you you may be have a sketch of the setup? Could be helpful to include. ANS: No, it's trivial :-)}
+The bottom boundary moves at constant velocity $V=0.05$ towards the right, $u(x_1=0,t) = V$, $t\geq 0$.
+The distance between bottom and top boundary is denoted by $H$.
+The initial velocity field is set to zero everywhere inside the channel, pressure (and density, respectively) are set to a constant value; in LBM, $\rho=1$ everywhere.
+
+Given this scenario, the incompressible Navier-Stokes system simplifies to~\cite{transientPlaneCouetteFlow}
+\begin{eqnarray}
+	\frac{\partial u}{\partial t} = \nu \frac{\partial^2 u}{\partial x_1^2}
+\end{eqnarray}
+and yields the analytic solution
+$$
+	u(x_1,t) = V\left(1 - \frac{x_1}{H} \right) - \frac{2V}{\pi}\sum_{k=1}^{\infty}\frac{1}{k}\sin\left(\frac{k\pi}{H} x_1\right)e^{-\frac{k^2\pi^2}{H^2}\nu t}.
+$$
+Pressure $p$ and velocity component $v_1$ remain constant/zero.
+
+
+
+
+\subparagraph{PinT tests}
+
+The results of applying a PinT method should include the following parameter ranges:
+
+\begin{itemize}
+	\item Domain resolution $N\times N$ with $N \in \{ 32, 64\}$
+	\item Domain size $N \times N$ resulting in a mesh size $dx=1$ and $H=N$
+	\item Viscosity: $\nu = 0.05$
+	\item In case of using LBM, the Mega Lattice Updates per Second for the fine time stepping
+\end{itemize}
+As an alternative to the given domain size, appropriate re-scaling of all quantities to a unit square may be considered (e.g., for Navier-Stokes solvers).
+
+PinT studies should be done with L1, L2 and Linf errors:
+\begin{itemize}
+	\item PinT studies should be done with $t \in \{ 10, 100, 1000 \}$\todo{Determine if these values make sense!}
+	\item Using a PinT method: Convergence plots to solution over time at selected points in time.
+\end{itemize}
+
+\todo{When running these simulations to check that values make sense, it would be good to include figures to show how the outcome should look like?}
+
+\todo{For PINT, we should probably ask for work-precision diagrams, that is plots showing error versus runtime? After all, we are all about computing the solution faster.}
+
+%%%%%%%%%%
+%%% LBM-2: Taylor Green
+%%%%%%%%%%
+\paragraph{LBM-2: Taylor Green}
+
+
+
+\subparagraph{Benchmark description}
+
+The Taylor Green benchmark assumes the incompressible Navier-Stokes equations, see \cite{taylor1937mechanism} for more information.
+The setup consists of a periodic two-dimensional box of size $N \times N$ with initial conditions for velocity field and pressure prescribed; for the initial conditions, see sections below.
+The following equations and formulations are amongst others based on \cite{wikiTaylorGreen} and \cite{taylor1937mechanism}.
+
+
+A particular solution of the velocity field is
+\begin{eqnarray}
+%	u = A \cos a x \sin b y \sin c z\\
+%	v = B \sin a x \cos b y \sin c z\\
+%	w = C \sin a x \sin b y \cos c z
+% 2D formulation from WIKI
+	u &=& u_0\cos \left(2\pi x_0/N\right) \sin \left(2\pi x_1/N\right) F(t)\\
+	v &=& -u_0\sin \left(2\pi x_0/N\right) \cos \left(2\pi x_1/N\right) F(t)
+\end{eqnarray}
+%with the consistency requirement
+%\begin{equation}
+%	Aa + Bb + Cc = 0
+%\end{equation}
+with
+$$
+	F(t) = e^{-2\nu t}
+$$
+%A solution at time $t$ is then given by
+%\begin{eqnarray}
+%	u	&=&A(a-\theta vt) \cos ax \sin by \sin cz\\
+%		& &+ \frac{A_3}{a} t \sin 2ax \cos 2by\\
+%		& &- \frac{A_2}{a} t \sin 2ax \cos 2cz
+%\end{eqnarray}
+
+The solution of pressure field is given by
+\begin{eqnarray}
+	p &=& p_0-\frac{u_0^2}{4} \left( \cos \left(4\pi x_0/N\right) + \cos \left(4\pi x_1/N\right) \right) F^2(t)
+\end{eqnarray}
+with arbitrary constant $p_0$ (in the incompressible Navier-Stokes sense).
+For LBM, we set $p_0:=\frac{1}{3}$.
+
+
+\subparagraph{PinT tests}
+
+The results of applying a PinT method should include the following parameter ranges:
+
+\begin{itemize}
+	\item Domain resolution $N\times N$ with $N \in \{ 32, 64\}$
+	\item Domain size $N\times N$ resulting in a mesh size $dx=1.0$
+	\item Viscosity: $\nu = 0.05$, $u_0 = 0.01$
+	\item PinT studies should be done with $t \in \{ 10, 100, 1000 \}$
+	\item In case of using LBM, the Mega Lattice Updates per Second for the fine time stepping
+\end{itemize}
+As an alternative to the given domain size, appropriate re-scaling of all quantities to a unit square or to the periodic domain $2\pi \times 2\pi$ may be considered (e.g., for Navier-Stokes solvers).
+
+PinT studies should be done with L1, L2 and Linf errors:
+\begin{itemize}
+	\item Using a PinT method: Convergence plots to current solution.
+\end{itemize}
+
+
+
+
+%%%%%%%%%%
+%%% LBM-3: Driven Cavity
+%%%%%%%%%%
+
+
+%\subsection{LBM-3: Driven Cavity}
+%
+%\subsubsection{Benchmark description}
+%
+%\begin{figure}
+%	\center
+%	\includegraphics[width=0.6\textwidth]{pics_external/cavity_flow.png}
+%	\caption{Driven cavity configuration, source: \cite{ghia1982high}}
+%\end{figure}
+%
+%\begin{itemize}
+%	\item Resolutions: $151^2$, $121^2$?!?
+%	\item Reynolds numbers: 10000, 1000, 100?
+%\end{itemize}
+%
+%\subsubsection{Reference solution}
+%
+%The reference solution is generated with standard fine time stepping.
+%
+%\subsubsection{PinT tests}
+%
+%The results of applying a PinT method should include the following parameter ranges:
+%\todo{TODO}
+%\begin{tabular}{cc}
+%\end{tabular}
+
