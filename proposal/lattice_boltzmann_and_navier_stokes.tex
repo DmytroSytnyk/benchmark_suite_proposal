@@ -88,11 +88,11 @@ The initial velocity field is set to zero everywhere inside the channel, pressur
 
 Given this scenario, the incompressible Navier-Stokes system simplifies to~\cite{transientPlaneCouetteFlow}
 \begin{eqnarray}
-	\frac{\partial u}{\partial t} = \nu \frac{\partial^2 u}{\partial x_1^2}
+	\frac{\partial v_0}{\partial t} = \nu \frac{\partial^2 v_0}{\partial x_1^2}
 \end{eqnarray}
 and yields the analytic solution
 $$
-	u(x_1,t) = V\left(1 - \frac{x_1}{H} \right) - \frac{2V}{\pi}\sum_{k=1}^{\infty}\frac{1}{k}\sin\left(\frac{k\pi}{H} x_1\right)e^{-\frac{k^2\pi^2}{H^2}\nu t}.
+	v_0(x_1,t) = V\left(1 - \frac{x_1}{H} \right) - \frac{2V}{\pi}\sum_{k=1}^{\infty}\frac{1}{k}\sin\left(\frac{k\pi}{H} x_1\right)e^{-\frac{k^2\pi^2}{H^2}\nu t}.
 $$
 Pressure $p$ and velocity component $v_1$ remain constant/zero.
 
@@ -106,7 +106,7 @@ The results of applying a PinT method should include the following parameter ran
 \begin{itemize}
 	\item Domain resolution $N\times N$ with $N \in \{ 32, 64\}$
 	\item Domain size $N \times N$ resulting in a mesh size $dx=1$ and $H=N$
-	\item Viscosity: $\nu = 0.05$
+	\item Viscosity: $\nu = 0.05$, velocity: $V=0.05$
 	\item In case of using LBM, the Mega Lattice Updates per Second for the fine time stepping
 \end{itemize}
 As an alternative to the given domain size, appropriate re-scaling of all quantities to a unit square may be considered (e.g., for Navier-Stokes solvers).
@@ -117,7 +117,12 @@ PinT studies should be done with L1, L2 and Linf errors:
 	\item Using a PinT method: Convergence plots to solution over time at selected points in time.
 \end{itemize}
 
-\todo{When running these simulations to check that values make sense, it would be good to include figures to show how the outcome should look like?}
+\begin{figure}[t!]
+\begin{tabular}{c c}
+\includegraphics[width=0.45\textwidth]{lattice_boltzmann_and_navier_stokes_images/32x32_couette_v0.png} & \includegraphics[width=0.45\textwidth]{lattice_boltzmann_and_navier_stokes_images/64x64_couette_v0.png}
+\end{tabular}
+\caption{Velocity profile $v_0(x_1)$ of LB-based Couette flow simulation across the channel at different instance in time $T$. Left: $N=32$. Right: $N=64$.}
+\end{figure}
 
 \todo{For PINT, we should probably ask for work-precision diagrams, that is plots showing error versus runtime? After all, we are all about computing the solution faster.}
 
@@ -131,18 +136,18 @@ PinT studies should be done with L1, L2 and Linf errors:
 \subparagraph{Benchmark description}
 
 The Taylor Green benchmark assumes the incompressible Navier-Stokes equations, see \cite{taylor1937mechanism} for more information.
-The setup consists of a periodic two-dimensional box of size $N \times N$ with initial conditions for velocity field and pressure prescribed; for the initial conditions, see sections below.
+The setup consists of a periodic two-dimensional box of size $2\pi \times 2\pi$ with initial conditions for velocity field and pressure prescribed; for the initial conditions, see sections below.
 The following equations and formulations are amongst others based on \cite{wikiTaylorGreen} and \cite{taylor1937mechanism}.
 
 
-A particular solution of the velocity field is
+A particular solution of the velocity field over time is
 \begin{eqnarray}
 %	u = A \cos a x \sin b y \sin c z\\
 %	v = B \sin a x \cos b y \sin c z\\
 %	w = C \sin a x \sin b y \cos c z
 % 2D formulation from WIKI
-	u &=& u_0\cos \left(2\pi x_0/N\right) \sin \left(2\pi x_1/N\right) F(t)\\
-	v &=& -u_0\sin \left(2\pi x_0/N\right) \cos \left(2\pi x_1/N\right) F(t)
+	v_0(x_0,x_1,t) &=& u_c\cos \left(2\pi x_0\right) \sin \left(2\pi x_1\right) F(t)\\
+	v_1(x_0,x_1,t) &=& -u_c\sin \left(2\pi x_0\right) \cos \left(2\pi x_1\right) F(t)
 \end{eqnarray}
 %with the consistency requirement
 %\begin{equation}
@@ -150,7 +155,7 @@ A particular solution of the velocity field is
 %\end{equation}
 with
 $$
-	F(t) = e^{-2\nu t}
+	F(t) = e^{-2\nu_c t}
 $$
 %A solution at time $t$ is then given by
 %\begin{eqnarray}
@@ -159,9 +164,9 @@ $$
 %		& &- \frac{A_2}{a} t \sin 2ax \cos 2cz
 %\end{eqnarray}
 
-The solution of pressure field is given by
+The solution of the pressure field is given by
 \begin{eqnarray}
-	p &=& p_0-\frac{u_0^2}{4} \left( \cos \left(4\pi x_0/N\right) + \cos \left(4\pi x_1/N\right) \right) F^2(t)
+	p(x_0,x_1,t) &=& p_0-\frac{u_c^2}{4} \left( \cos \left(4\pi x_0\right) + \cos \left(4\pi x_1\right) \right) F^2(t)
 \end{eqnarray}
 with arbitrary constant $p_0$ (in the incompressible Navier-Stokes sense).
 For LBM, we set $p_0:=\frac{1}{3}$.
@@ -173,20 +178,29 @@ The results of applying a PinT method should include the following parameter ran
 
 \begin{itemize}
 	\item Domain resolution $N\times N$ with $N \in \{ 32, 64\}$
-	\item Domain size $N\times N$ resulting in a mesh size $dx=1.0$
-	\item Viscosity: $\nu = 0.05$, $u_0 = 0.01$
+	\item Domain size $2\pi\times 2\pi$ resulting in a mesh size $dx=2\pi/N$
+	\item Viscosity in LB simulation: $\nu = 0.05$ (corresponding to relaxation time $\tau=0.65$ in the BGK model), $u_c = 0.01$; choosing the time step $dt\stackrel{!}{=}dx$, this corresponds to a viscosity value $\nu_c=\nu\cdot dx^2/dt \approx 0.00981747$. The (dimensionless) velocity and pressure values of the LB simulation and the analytic solution from above correspond to each other under this scaling. For Navier-Stokes simulations, a viscosity $\nu_c$ shall directly be used
 	\item PinT studies should be done with $t \in \{ 10, 100, 1000 \}$
 	\item In case of using LBM, the Mega Lattice Updates per Second for the fine time stepping
 \end{itemize}
-As an alternative to the given domain size, appropriate re-scaling of all quantities to a unit square or to the periodic domain $2\pi \times 2\pi$ may be considered (e.g., for Navier-Stokes solvers).
+As an alternative to the given domain size, appropriate re-scaling of all quantities to a unit square may be considered (e.g., for Navier-Stokes solvers).
 
 PinT studies should be done with L1, L2 and Linf errors:
 \begin{itemize}
 	\item Using a PinT method: Convergence plots to current solution.
 \end{itemize}
 
-
-
+\begin{figure}[t!]
+\begin{tabular}{c c}
+\includegraphics[width=0.45\textwidth]{lattice_boltzmann_and_navier_stokes_images/32x32_15x15_taylorgreen_v0.png} & \includegraphics[width=0.45\textwidth]{lattice_boltzmann_and_navier_stokes_images/64x64_31x31_taylorgreen_v0.png}\\
+(a) & (b)\\
+\includegraphics[width=0.45\textwidth]{lattice_boltzmann_and_navier_stokes_images/32x32_15x15_taylorgreen_v1.png} & \includegraphics[width=0.45\textwidth]{lattice_boltzmann_and_navier_stokes_images/64x64_31x31_taylorgreen_v1.png}\\
+(c) & (d)\\
+\includegraphics[width=0.45\textwidth]{lattice_boltzmann_and_navier_stokes_images/32x32_15x15_taylorgreen_p.png} & \includegraphics[width=0.45\textwidth]{lattice_boltzmann_and_navier_stokes_images/64x64_31x31_taylorgreen_p.png}\\
+(e) & (f)
+\end{tabular}
+\caption{Taylor-Green solution for pressure and velocity over time interval $t\geq 10~000$. Left: solution measured in cell (15,15) corresponding to $(x_0,x_1)=(2.847,2.847)$ using $N=32$ cells in both x- and y-direction. Right: solution measured in cell (31,31) corresponding to $(x_0,x_1)=(2.994,2.994)$ using $N=64$ cells in both x- and y-direction. The blue lines correspond to the LB simulation, the red lines denote the analytic solution.}
+\end{figure}
 
 %%%%%%%%%%
 %%% LBM-3: Driven Cavity
