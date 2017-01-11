@@ -1,0 +1,15 @@
+Author: Philipp Neumann
+Lattice Boltzmann simulation (D2Q9, BGK model) for various setups. To choose and adapt the respective scenario, modify main.cpp accordingly. To compile the code, run "make" in src-directory. To run the simulation, run "./lbsim". The simulation can write vtk-compatible output files.
+src/
+CollideStream*: contains the basic LB algorithm and boundary treatment
+LBScenario.h  : defines different scenarios (e.g., "taylorgreen" and "couette")
+LBField.*     : data structure for flow field and particle distribution functions
+VTK.h         : for vtk-compatible output
+main.cpp      : sets together all simulation pieces
+
+ref/
+Results are given in:
+- taylor_green.ods
+  -> point data for cell 15x15 in N=32 Taylor-Green setup, and for cell 31x31 in N=64 Taylor-Green setup
+- couette.ods
+  -> profile data for velocity profile v_0(x_1) in 32x32 and 64x64 Couette setup
